@@ -1,0 +1,3 @@
+# National Party Westbridge — allow public crawlers; staff URLs may use noindex in HTML.
+User-agent: *
+Allow: /

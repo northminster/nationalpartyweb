@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#0a1220" />
+    <meta name="description" content="Manage staff accounts for National Party Westbridge." />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Accounts (staff) | National Party Westbridge</title>
+    <link rel="icon" href="images/national-party-logo.png" type="image/png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Source+Sans+3:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+    <script src="auth.js"></script>
+    <script>
+      if (!window.NPWAuth) {
+        window.location.replace("login.html");
+      } else if (!NPWAuth.requireAuth("login.html")) {
+        /* redirect */
+      } else if (
+        !NPWAuth.requireAnyPermission(
+          [NPWAuth.PERM_MANAGE_USERS, NPWAuth.PERM_ADMIN],
+          "admin.html"
+        )
+      ) {
+        /* redirect */
+      }
+    </script>
+  </head>
+  <body class="login-page admin-page users-page">
+    <header class="site-header header-enter">
+      <div class="header-inner">
+        <a class="logo" href="index.html">
+          <img
+            class="logo-img"
+            src="images/national-party-logo.png"
+            alt="National Party Westbridge logo."
+            width="200"
+            height="72"
+            decoding="async"
+          />
+          <span class="logo-local">Westbridge</span>
+        </a>
+        <button
+          type="button"
+          class="nav-toggle"
+          aria-expanded="false"
+          aria-controls="site-nav"
+          id="nav-toggle"
+        >
+          <span class="visually-hidden">Menu</span>
+          <span class="nav-toggle-track" aria-hidden="true">
+            <span class="nav-toggle-bar"></span>
+            <span class="nav-toggle-bar"></span>
+            <span class="nav-toggle-bar"></span>
+          </span>
+        </button>
+        <nav class="nav" id="site-nav" aria-label="Admin">
+          <a href="admin.html">Dashboard</a>
+          <a href="events.html">Events</a>
+          <a href="announcements.html">Announcements</a>
+          <a href="index.html">View site</a>
+          <button type="button" class="btn btn-ghost admin-logout-btn" id="logout-btn">Log out</button>
+        </nav>
+      </div>
+    </header>
+
+    <main class="users-main" id="main">
+      <div class="users-shell">
+        <div class="users-panel">
+          <h1 class="login-title">Accounts &amp; permissions</h1>
+          <p class="users-lede">
+            Create sign-ins for your team and choose what each person can do. Data is stored only in
+            this browser until you add a server.
+          </p>
+
+          <section class="users-card" aria-labelledby="new-user-heading">
+            <h2 id="new-user-heading" class="users-section-title">New account</h2>
+            <form id="new-user-form" class="new-user-form">
+              <div class="field">
+                <label for="new-email">Email</label>
+                <input id="new-email" type="email" required autocomplete="off" placeholder="name@example.com" />
+              </div>
+              <div class="field">
+                <label for="new-password">Password</label>
+                <input
+                  id="new-password"
+                  type="password"
+                  autocomplete="new-password"
+                  required
+                  minlength="8"
+                  placeholder="At least 8 characters"
+                />
+              </div>
+              <fieldset class="perm-fieldset">
+                <legend class="perm-legend">Permissions</legend>
+                <p class="perm-hint">Administrator includes everything below.</p>
+                <div id="new-user-perms" class="perm-checkboxes"></div>
+              </fieldset>
+              <button type="submit" class="btn btn-primary">Create account</button>
+            </form>
+            <p class="users-msg" id="new-user-msg" role="status" aria-live="polite"></p>
+          </section>
+
+          <section class="users-card" aria-labelledby="existing-heading">
+            <h2 id="existing-heading" class="users-section-title">Existing accounts</h2>
+            <div class="users-table-wrap">
+              <table class="users-table" id="users-table">
+                <thead>
+                  <tr>
+                    <th scope="col">Email</th>
+                    <th scope="col">Permissions</th>
+                    <th scope="col">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="users-tbody"></tbody>
+              </table>
+            </div>
+            <p class="users-msg" id="table-msg" role="status" aria-live="polite"></p>
+          </section>
+        </div>
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <div class="footer-inner">
+        <p>&copy; <span id="year"></span> National Party Westbridge. Admin area.</p>
+      </div>
+    </footer>
+
+    <script>
+      document.getElementById("year").textContent = new Date().getFullYear();
+
+      document.getElementById("logout-btn").addEventListener("click", function () {
+        NPWAuth.clearSession();
+        window.location.href = "login.html";
+      });
+
+      (function () {
+        var catalog = NPWAuth.PERMISSION_CATALOG;
+        var tbody = document.getElementById("users-tbody");
+        var newPermsEl = document.getElementById("new-user-perms");
+
+        function permLabels(ids) {
+          if (!ids || !ids.length) return "None";
+          if (ids.indexOf(NPWAuth.PERM_ADMIN) !== -1) return "Administrator";
+          return ids
+            .map(function (id) {
+              var c = catalog.find(function (x) {
+                return x.id === id;
+              });
+              return c ? c.label : id;
+            })
+            .join("; ");
+        }
+
+        function renderNewUserCheckboxes() {
+          newPermsEl.innerHTML = "";
+          catalog.forEach(function (item) {
+            var id = "perm-new-" + item.id;
+            var label = document.createElement("label");
+            label.className = "perm-row";
+            label.innerHTML =
+              '<input type="checkbox" name="perm" value="' +
+              item.id +
+              '" id="' +
+              id +
+              '" /> ' +
+              "<span>" +
+              item.label +
+              "</span>";
+            newPermsEl.appendChild(label);
+          });
+        }
+
+        function selectedPermsFromForm(container) {
+          var boxes = container.querySelectorAll('input[name="perm"]:checked');
+          var ids = [];
+          boxes.forEach(function (b) {
+            ids.push(b.value);
+          });
+          return NPWAuth.normalizePermissions(ids);
+        }
+
+        function renderTable() {
+          var session = NPWAuth.getSession();
+          var rows = NPWAuth.listUsers();
+          tbody.innerHTML = "";
+          rows.forEach(function (u) {
+            var tr = document.createElement("tr");
+            var isSelf = session && session.userId === u.id;
+            var permCell = document.createElement("td");
+            permCell.textContent = permLabels(u.permissions);
+
+            var actions = document.createElement("td");
+            actions.className = "users-actions";
+
+            if (!isSelf) {
+              var editBtn = document.createElement("button");
+              editBtn.type = "button";
+              editBtn.className = "btn btn-ghost btn-sm";
+              editBtn.textContent = "Edit permissions";
+              editBtn.addEventListener("click", function () {
+                openEditRow(u);
+              });
+              actions.appendChild(editBtn);
+
+              var delBtn = document.createElement("button");
+              delBtn.type = "button";
+              delBtn.className = "btn btn-ghost btn-sm users-btn-danger";
+              delBtn.textContent = "Remove";
+              delBtn.addEventListener("click", function () {
+                if (!confirm("Remove account " + u.email + "?")) return;
+                NPWAuth.deleteUser(u.id).then(function (r) {
+                  document.getElementById("table-msg").textContent = r.ok
+                    ? "Account removed."
+                    : r.error || "Could not remove.";
+                  renderTable();
+                });
+              });
+              actions.appendChild(delBtn);
+            } else {
+              actions.textContent = "You";
+            }
+
+            var tdEmail = document.createElement("td");
+            tdEmail.textContent = u.email;
+            tr.appendChild(tdEmail);
+            tr.appendChild(permCell);
+            tr.appendChild(actions);
+            tbody.appendChild(tr);
+          });
+        }
+
+        function escapeHtml(s) {
+          var d = document.createElement("div");
+          d.textContent = s;
+          return d.innerHTML;
+        }
+
+        function openEditRow(user) {
+          var dlg = document.createElement("div");
+          dlg.className = "users-modal-overlay";
+          dlg.setAttribute("role", "dialog");
+          dlg.setAttribute("aria-modal", "true");
+          dlg.innerHTML =
+            '<div class="users-modal">' +
+            '<h3 class="users-modal-title">Edit permissions</h3>' +
+            '<p class="users-modal-email">' +
+            escapeHtml(user.email) +
+            "</p>" +
+            '<div id="edit-perms" class="perm-checkboxes"></div>' +
+            '<div class="users-modal-actions">' +
+            '<button type="button" class="btn btn-ghost" id="edit-cancel">Cancel</button> ' +
+            '<button type="button" class="btn btn-primary" id="edit-save">Save</button>' +
+            "</div>" +
+            '<p class="users-msg" id="edit-msg"></p>' +
+            "</div>";
+
+          document.body.appendChild(dlg);
+
+          var editPerms = dlg.querySelector("#edit-perms");
+          catalog.forEach(function (item) {
+            var checked = user.permissions.indexOf(item.id) !== -1;
+            if (item.id === NPWAuth.PERM_ADMIN && user.permissions.indexOf(NPWAuth.PERM_ADMIN) !== -1) {
+              checked = true;
+            }
+            var label = document.createElement("label");
+            label.className = "perm-row";
+            var cb = document.createElement("input");
+            cb.type = "checkbox";
+            cb.name = "perm";
+            cb.value = item.id;
+            if (checked) cb.checked = true;
+            label.appendChild(cb);
+            label.appendChild(document.createTextNode(" " + item.label));
+            editPerms.appendChild(label);
+          });
+
+          function close() {
+            dlg.remove();
+          }
+
+          dlg.querySelector("#edit-cancel").addEventListener("click", close);
+          dlg.addEventListener("click", function (e) {
+            if (e.target === dlg) close();
+          });
+
+          dlg.querySelector("#edit-save").addEventListener("click", function () {
+            var perms = selectedPermsFromForm(editPerms);
+            NPWAuth.updateUserPermissions(user.id, perms).then(function (r) {
+              var msg = dlg.querySelector("#edit-msg");
+              if (r.ok) {
+                msg.textContent = "Saved.";
+                renderTable();
+                setTimeout(close, 400);
+              } else {
+                msg.textContent = r.error || "Could not save.";
+              }
+            });
+          });
+        }
+
+        document.getElementById("new-user-form").addEventListener("submit", async function (e) {
+          e.preventDefault();
+          var msg = document.getElementById("new-user-msg");
+          msg.textContent = "";
+          await NPWAuth.ensureUsers();
+          var email = document.getElementById("new-email").value;
+          var password = document.getElementById("new-password").value;
+          var perms = selectedPermsFromForm(newPermsEl);
+          var r = await NPWAuth.createUser(email, password, perms);
+          msg.textContent = r.ok ? "Account created." : r.error || "Failed.";
+          if (r.ok) {
+            document.getElementById("new-user-form").reset();
+            renderNewUserCheckboxes();
+            renderTable();
+          }
+        });
+
+        renderNewUserCheckboxes();
+        renderTable();
+      })();
+    </script>
+    <script src="nav.js"></script>
+  </body>
+</html>

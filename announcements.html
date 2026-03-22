@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#0a1220" />
+    <meta name="description" content="Publish official announcements for National Party Westbridge." />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Announcements (staff) | National Party Westbridge</title>
+    <link rel="icon" href="images/national-party-logo.png" type="image/png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Source+Sans+3:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+    <script src="auth.js"></script>
+    <script>
+      if (!window.NPWAuth) {
+        window.location.replace("login.html");
+      } else if (!NPWAuth.requireAuth("login.html")) {
+        /* redirect */
+      } else if (!NPWAuth.requireAnyPermission([NPWAuth.PERM_PUBLISH, NPWAuth.PERM_ADMIN], "admin.html")) {
+        /* redirect */
+      }
+    </script>
+  </head>
+  <body class="login-page admin-page announce-page">
+    <header class="site-header header-enter">
+      <div class="header-inner">
+        <a class="logo" href="index.html">
+          <img
+            class="logo-img"
+            src="images/national-party-logo.png"
+            alt="National Party Westbridge logo."
+            width="200"
+            height="72"
+            decoding="async"
+          />
+          <span class="logo-local">Westbridge</span>
+        </a>
+        <button
+          type="button"
+          class="nav-toggle"
+          aria-expanded="false"
+          aria-controls="site-nav"
+          id="nav-toggle"
+        >
+          <span class="visually-hidden">Menu</span>
+          <span class="nav-toggle-track" aria-hidden="true">
+            <span class="nav-toggle-bar"></span>
+            <span class="nav-toggle-bar"></span>
+            <span class="nav-toggle-bar"></span>
+          </span>
+        </button>
+        <nav class="nav" id="site-nav" aria-label="Admin">
+          <a href="admin.html">Dashboard</a>
+          <a href="events.html">Events</a>
+          <a href="index.html">View site</a>
+          <button type="button" class="btn btn-ghost admin-logout-btn" id="logout-btn">Log out</button>
+        </nav>
+      </div>
+    </header>
+
+    <main class="announce-main" id="main">
+      <div class="announce-shell">
+        <div class="announce-head">
+          <p class="admin-badge">Administrator</p>
+          <h1 class="login-title">Official announcements</h1>
+          <p class="login-lede announce-lede">
+            Draft and publish updates for the public site. Formatting is saved in this browser only
+            until you add a server. Visitors on other devices won’t see it unless you host shared
+            storage or export the HTML.
+          </p>
+        </div>
+
+        <div class="announce-meta">
+          <label class="announce-title-label" for="announce-title">Headline</label>
+          <input
+            type="text"
+            id="announce-title"
+            class="announce-title-input"
+            placeholder="e.g. Policy update, March 2025"
+            maxlength="200"
+            autocomplete="off"
+          />
+        </div>
+
+        <div class="announce-editor-wrap">
+          <div id="editor"></div>
+        </div>
+
+        <div class="announce-actions">
+          <button type="button" class="btn btn-ghost" id="btn-draft">Save draft</button>
+          <button type="button" class="btn btn-primary" id="btn-publish">Publish to site</button>
+          <button type="button" class="btn btn-ghost announce-btn-danger" id="btn-clear">Clear editor</button>
+        </div>
+
+        <p class="announce-status" id="announce-status" role="status" aria-live="polite"></p>
+        <p class="announce-hint" id="announce-last-published"></p>
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <div class="footer-inner">
+        <p>&copy; <span id="year"></span> National Party Westbridge. Admin area.</p>
+      </div>
+    </footer>
+
+    <script src="https://cdn.quilljs.com/1.3.7/quill.js"></script>
+    <script src="announcements-editor.js"></script>
+    <script>
+      document.getElementById("year").textContent = new Date().getFullYear();
+      document.getElementById("logout-btn").addEventListener("click", function () {
+        NPWAuth.clearSession();
+        window.location.href = "login.html";
+      });
+    </script>
+    <script src="nav.js"></script>
+  </body>
+</html>

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#0a1220" />
+    <meta name="description" content="Manage public events for National Party Westbridge." />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Events (staff) | National Party Westbridge</title>
+    <link rel="icon" href="images/national-party-logo.png" type="image/png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Source+Sans+3:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+    <script src="auth.js"></script>
+    <script>
+      if (!window.NPWAuth) {
+        window.location.replace("login.html");
+      } else if (!NPWAuth.requireAuth("login.html")) {
+        /* redirect */
+      } else if (!NPWAuth.requireAnyPermission([NPWAuth.PERM_PUBLISH, NPWAuth.PERM_ADMIN], "admin.html")) {
+        /* redirect */
+      }
+    </script>
+  </head>
+  <body class="login-page admin-page events-manage-page">
+    <header class="site-header header-enter">
+      <div class="header-inner">
+        <a class="logo" href="index.html">
+          <img
+            class="logo-img"
+            src="images/national-party-logo.png"
+            alt="National Party Westbridge logo."
+            width="200"
+            height="72"
+            decoding="async"
+          />
+          <span class="logo-local">Westbridge</span>
+        </a>
+        <button
+          type="button"
+          class="nav-toggle"
+          aria-expanded="false"
+          aria-controls="site-nav"
+          id="nav-toggle"
+        >
+          <span class="visually-hidden">Menu</span>
+          <span class="nav-toggle-track" aria-hidden="true">
+            <span class="nav-toggle-bar"></span>
+            <span class="nav-toggle-bar"></span>
+            <span class="nav-toggle-bar"></span>
+          </span>
+        </button>
+        <nav class="nav" id="site-nav" aria-label="Admin">
+          <a href="admin.html">Dashboard</a>
+          <a href="announcements.html">Announcements</a>
+          <a href="index.html">View site</a>
+          <button type="button" class="btn btn-ghost admin-logout-btn" id="logout-btn">Log out</button>
+        </nav>
+      </div>
+    </header>
+
+    <main class="events-manage-main" id="main">
+      <div class="events-manage-shell">
+        <div class="announce-head">
+          <p class="admin-badge">Staff</p>
+          <h1 class="login-title">Events</h1>
+          <p class="login-lede announce-lede">
+            Add what’s on: titles, time or place (or online), and a short description. Publish to show them
+            on the public homepage (this browser only until you use a server).
+          </p>
+        </div>
+
+        <div id="events-rows" class="events-rows"></div>
+
+        <div class="events-manage-actions">
+          <button type="button" class="btn btn-ghost" id="btn-add-event">Add event</button>
+          <button type="button" class="btn btn-primary" id="btn-publish-events">Save &amp; publish to site</button>
+          <button type="button" class="btn btn-ghost announce-btn-danger" id="btn-clear-events">
+            Clear all events
+          </button>
+        </div>
+
+        <p class="announce-status" id="events-status" role="status" aria-live="polite"></p>
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <div class="footer-inner">
+        <p>&copy; <span id="year"></span> National Party Westbridge. Admin area.</p>
+      </div>
+    </footer>
+
+    <script src="events-editor.js"></script>
+    <script>
+      document.getElementById("year").textContent = new Date().getFullYear();
+      document.getElementById("logout-btn").addEventListener("click", function () {
+        NPWAuth.clearSession();
+        window.location.href = "login.html";
+      });
+    </script>
+    <script src="nav.js"></script>
+  </body>
+</html>

@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#0a1220" />
+    <meta name="description" content="Staff sign-in for National Party Westbridge." />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Sign in | National Party Westbridge</title>
+    <link rel="icon" href="images/national-party-logo.png" type="image/png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Source+Sans+3:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+    <script src="auth.js"></script>
+    <script>
+      if (window.NPWAuth) NPWAuth.redirectIfAuthed("admin.html");
+    </script>
+  </head>
+  <body class="login-page">
+    <header class="site-header header-enter">
+      <div class="header-inner">
+        <a class="logo" href="index.html">
+          <img
+            class="logo-img"
+            src="images/national-party-logo.png"
+            alt="National Party Westbridge logo."
+            width="200"
+            height="72"
+            decoding="async"
+          />
+          <span class="logo-local">Westbridge</span>
+        </a>
+        <button
+          type="button"
+          class="nav-toggle"
+          aria-expanded="false"
+          aria-controls="site-nav"
+          id="nav-toggle"
+        >
+          <span class="visually-hidden">Menu</span>
+          <span class="nav-toggle-track" aria-hidden="true">
+            <span class="nav-toggle-bar"></span>
+            <span class="nav-toggle-bar"></span>
+            <span class="nav-toggle-bar"></span>
+          </span>
+        </button>
+        <nav class="nav" id="site-nav" aria-label="Primary">
+          <a href="index.html">Home</a>
+          <a href="index.html#about">About</a>
+          <a href="index.html#priorities">Priorities</a>
+          <a href="index.html#manifesto">Manifesto</a>
+          <a href="index.html#team">Meet the team</a>
+          <a href="index.html#transport">Transport</a>
+          <a href="index.html#defence">Defence</a>
+          <a href="index.html#policing">Policing</a>
+          <a href="index.html#events">Events</a>
+          <a href="index.html#involved">Get involved</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="login-main" id="main">
+      <div class="login-panel hero-fade">
+        <h1 class="login-title">Sign in</h1>
+        <p class="login-lede">Staff access for National Party Westbridge.</p>
+
+        <form class="login-form" id="login-form" action="#" method="post" novalidate>
+          <div class="field">
+            <label for="login-email">Email</label>
+            <input
+              id="login-email"
+              name="email"
+              type="email"
+              autocomplete="email"
+              required
+              placeholder="you@example.com"
+            />
+          </div>
+          <div class="field">
+            <label for="login-password">Password</label>
+            <input
+              id="login-password"
+              name="password"
+              type="password"
+              autocomplete="current-password"
+              required
+              placeholder="••••••••"
+            />
+          </div>
+          <div class="login-row">
+            <label class="login-check">
+              <input type="checkbox" name="remember" value="1" />
+              <span>Remember me</span>
+            </label>
+          </div>
+          <p class="login-forgot-hint">
+            Lost access? Contact another administrator with account permissions.
+          </p>
+          <button type="submit" class="btn btn-primary login-submit">Sign in</button>
+        </form>
+
+        <p class="login-note" id="login-note" role="status" aria-live="polite" hidden></p>
+
+        <p class="login-back">
+          <a href="index.html">Back to homepage</a>
+        </p>
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <div class="footer-inner">
+        <p>&copy; <span id="year"></span> National Party Westbridge.</p>
+      </div>
+    </footer>
+
+    <script>
+      document.getElementById("year").textContent = new Date().getFullYear();
+
+      (function () {
+        var form = document.getElementById("login-form");
+        var note = document.getElementById("login-note");
+        form.addEventListener("submit", async function (e) {
+          e.preventDefault();
+          note.hidden = false;
+          var email = document.getElementById("login-email").value;
+          var password = document.getElementById("login-password").value;
+          var remember = form.querySelector('input[name="remember"]').checked;
+          if (!window.NPWAuth) {
+            note.textContent = "A required script did not load. Refresh the page or try again.";
+            return;
+          }
+          try {
+            await NPWAuth.ensureUsers();
+            var ok = await NPWAuth.tryLogin(email, password, remember);
+            if (ok) {
+              note.textContent = "Signed in. Redirecting…";
+              note.hidden = false;
+              window.location.href = "admin.html";
+              return;
+            }
+            note.textContent = "Email or password is incorrect.";
+          } catch (err) {
+            note.textContent = "Sign-in failed. Try again.";
+          }
+        });
+      })();
+    </script>
+    <script src="nav.js"></script>
+  </body>
+</html>
